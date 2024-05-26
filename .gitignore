@@ -6,3 +6,11 @@ node_modules
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+# Others
+.venv
+.DS_Store
+TODOLIST.md
+input.yaml
+output.yaml
+sync.py

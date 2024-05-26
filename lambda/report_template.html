@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title"></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .detection-date-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .level-container {
+      margin-bottom: 20px;
+    }
+
+    .issue-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .issue-item {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .issue-header {
+      background-color: #f2f2f2;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .issue-header-text {
+      flex-grow: 1;
+    }
+
+    .issue-toggle-icon {
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .issue-content {
+      padding: 10px;
+    }
+
+    .issue-content.collapsed {
+      display: none;
+    }
+
+    .metadata-container {
+      margin-bottom: 10px;
+    }
+
+    .metadata-container p {
+      margin: 5px 0;
+    }
+
+    .content-container {
+      background-color: #f8f8f8;
+      padding: 10px;
+      border-radius: 4px;
+      white-space: pre-wrap;
+    }
+
+    pre {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.5;
+    }
+
+    code.code-block {
+      font-family: Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="main-title"></h1>
+  <div class="detection-date-container">
+    <h3 id="detection-date"></h3>
+  </div>
+  <div id="report-container"></div>
+
+  <script id="diy">
+    const title = 'XXXXXXX代码审核报告';
+    const subtitle = '检测时间: 2024年05月01日';
+    const data = [
+      {
+        "rule": "General Rule",
+        "content": [
+          {
+            "title": "一般规则违反",
+            "content": "在该文件中,我们发现了一个潜在的安全漏洞。代码如下:\n```java\nif @condition) {\n    doSomethingUnsafe();\n}\n```\n这段代码可能会导致系统崩溃,因为在某些情况下,`doSomethingUnsafe()`方法可能会执行一些不安全的操作。我们建议修复这个问题",
+            "filepath": "src/main/java/com/example/App.java @line 45-50",
+            "level": "serious"
+          },
+          {
+            "level": "major",
+            "title": "代码复杂度过高",
+            "content": "在该文件中,我们发现了一个代码复杂度过高的问题。代码如下:\n```java\nprivate double calculateTax(double income, int age, boolean isMarried) {\n    double tax = 0.0;\n    if @income <= 20000) {\n        tax = income * 0.1;\n    } else if @income <= 50000) {\n        tax = 2000 + @income - 20000) * 0.2;\n    } else {\n        tax = 8000 + @income - 50000) * 0.3;\n    }\n    if @age >= 65) {\n        tax *= 0.9;\n    }\n    if @isMarried) {\n        tax *= 0.95;\n    }\n    return tax;\n}\n```\n这段代码包含了多个嵌套的条件语句,逻辑较为复杂,不利于代码的可读性和维护性。我们建议将复杂的逻辑拆分成多个方法,或者使用更加简洁的表达式来实现相同的功能",
+            "filepath": "src/main/java/com/example/TaxCalculator.java @line 67-82"
+          }
+        ]
+      },
+      {
+        "rule": "Security Vulnerability",
+        "content": [
+          {
+            "title": "安全漏洞",
+            "content": "在该文件中,我们发现了一个SQL注入漏洞。代码如下:\n```jsp\n<%\n    String query = \"SELECT * FROM users WHERE name = '\" + request.getParameter(\"name\") + \"'\";\n    Statement stmt = conn.createStatement();\n    ResultSet rs = stmt.executeQuery(query);\n%>\n```\n这段代码直接将用户输入的数据拼接到SQL查询语句中,存在被注入的风险。我们建议使用参数化查询或者对用户输入进行适当的过滤和转义。",
+            "filepath": "src/main/webapp/index.jsp @line 12-18",
+            "level": "serious"
+          },
+          {
+            "title": "未使用代码",
+            "content": "在该文件中,我们发现了一个未使用代码的问题。代码如下:\n```java\npublic static String truncateString(String str, int length) {\n    if @str.length() <= length) {\n        return str;\n    }\n    return str.substring(0, length) + \"...\";\n}\n```\n这段代码似乎从未被使用过,保留它会增加代码的复杂性和维护成本。我们建议删除这段代码,或者在确实需要使用时再添加",
+            "filepath": "src/main/java/com/example/StringUtil.java @line 12-17",
+            "level": "trivial"
+          }
+        ]
+      }
+    ];
+  </script>
+
+  <script>
+    const levelTranslations = {
+      'serious': '严重问题',
+      'major': '主要问题',
+      'trivial': '琐碎问题'
+    };
+
+    const renderReport = (data, isExpanded) => {
+      const reportContainer = document.getElementById('report-container');
+      const levelContainers = {};
+
+      data.forEach((rule) => {
+        rule.content.forEach((item) => {
+          const level = item.level || 'major';
+          if (!['serious', 'major', 'trivial'].includes(level)) {
+            console.warn(`Invalid level: ${level}. Defaulting to 'major'.`);
+            item.level = 'major';
+          }
+
+          if (!levelContainers[level]) {
+            const levelContainer = document.createElement('div');
+            levelContainer.classList.add('level-container');
+
+            const levelHeading = document.createElement('h2');
+            levelHeading.textContent = levelTranslations[level] || '主要问题';
+            levelContainer.appendChild(levelHeading);
+
+            const issueList = document.createElement('ul');
+            issueList.classList.add('issue-list');
+            levelContainer.appendChild(issueList);
+
+            levelContainers[level] = {
+              container: levelContainer,
+              issueList: issueList
+            };
+
+            reportContainer.appendChild(levelContainer);
+          }
+
+          const issueItem = document.createElement('li');
+          issueItem.classList.add('issue-item');
+
+          const issueHeader = document.createElement('div');
+          issueHeader.classList.add('issue-header');
+
+          const issueHeaderText = document.createElement('span');
+          issueHeaderText.classList.add('issue-header-text');
+          issueHeaderText.textContent = `${item.title} (${item.filepath})`;
+          issueHeader.appendChild(issueHeaderText);
+
+          const issueToggleIcon = document.createElement('span');
+          issueToggleIcon.classList.add('issue-toggle-icon');
+          issueToggleIcon.textContent = isExpanded ? '-' : '+';
+          issueHeader.appendChild(issueToggleIcon);
+
+          issueItem.appendChild(issueHeader);
+
+          const issueContent = document.createElement('div');
+          issueContent.classList.add('issue-content');
+          if (!isExpanded) {
+            issueContent.classList.add('collapsed');
+          }
+
+          const metadataContainer = document.createElement('div');
+          metadataContainer.classList.add('metadata-container');
+
+          const titleLine = document.createElement('p');
+          titleLine.innerHTML = `<strong>Title:</strong> ${item.title}`;
+          metadataContainer.appendChild(titleLine);
+
+          const ruleLine = document.createElement('p');
+          ruleLine.innerHTML = `<strong>Rule:</strong> ${rule.rule}`;
+          metadataContainer.appendChild(ruleLine);
+
+          const filePathLine = document.createElement('p');
+          filePathLine.innerHTML = `<strong>File Path:</strong> ${item.filepath}`;
+          metadataContainer.appendChild(filePathLine);
+
+          issueContent.appendChild(metadataContainer);
+
+          const contentContainer = document.createElement('div');
+          contentContainer.classList.add('content-container');
+
+          const contentHtml = item.content.replace(/```(.*?)\n([\s\S]*?)\n```/g, (match, lang, code) => {
+            return `<pre><code class="code-block">${code.replace(/\n/g, '<br>')}</code></pre>`;
+          });
+          contentContainer.innerHTML = contentHtml.replace(/\n/g, '<br>');
+
+          issueContent.appendChild(contentContainer);
+
+          issueItem.appendChild(issueContent);
+          levelContainers[level].issueList.appendChild(issueItem);
+        });
+      });
+
+      const issueHeaders = document.querySelectorAll('.issue-header');
+      issueHeaders.forEach((header) => {
+        header.addEventListener('click', () => {
+          const issueContent = header.nextElementSibling;
+          issueContent.classList.toggle('collapsed');
+          const issueToggleIcon = header.querySelector('.issue-toggle-icon');
+          issueToggleIcon.textContent = issueContent.classList.contains('collapsed') ? '+' : '-';
+        });
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const pageTitleElement = document.getElementById('page-title');
+      const mainTitleElement = document.getElementById('main-title');
+      const detectionDateElement = document.getElementById('detection-date');
+
+      pageTitleElement.textContent = title;
+      mainTitleElement.textContent = title;
+      detectionDateElement.textContent = subtitle;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const isExpanded = urlParams.get('expand') === 'true';
+
+      renderReport(data, isExpanded);
+    });
+  </script>
+</body>
+</html>
