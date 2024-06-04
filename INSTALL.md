@@ -16,6 +16,10 @@
 6. `Review and create`页面，勾选`I acknowledge that AWS CloudFormation might create IAM resources.`复选框，点击`Submit`按钮。
 7. 等待2～3分钟即可完成Stack的安装
 
+⚠️ 注意：目前仅仅支持：美东1（us-east-1）、美西2（us-west-2）、孟买（ap-south-1）、悉尼（ap-southeast-2）、巴黎（eu-west-3）、爱尔兰（eu-west-1）。具体可参看《[按 AWS 地区划分的模型支持](https://docs.aws.amazon.com/zh_cn/bedrock/latest/userguide/models-regions.html)》
+
+⚠️ 注意：如果需要卸载方案，S3 Bucket和DynamoDB不会自动删除，你需要自行删除这些资源。尤其当你需要重新安装方案时，必须先删除已存在的S3 Bucket和DynamoDB表。
+
 ## 配置数据库
 
 进入Dynamodb服务，找到数据库表`{project_name}-rule`，已经内置了两条数据。修改这两条数据的repository_url成为你自己的项目的url。你也可以按照你实际需要配置`{project_name}-rule`

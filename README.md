@@ -13,6 +13,7 @@
 说明：
 - 如果你只是使用本方案，或者进行简单微调（例如：修改Lambda代码），CloudFormation的安装方法是适合的
 - 如果你希望二次开发本方案，进行持续迭代，推荐通过CDK方式安装，可参看文档《[CDK安装法](INSTALL-CDK.md)》
+- 当前版本仅仅支持部分区域，详情请参看安装文档。
 
 ## 3. 项目架构
 
@@ -172,6 +173,12 @@
 
 	然后你需要改造`{project_name}-request-handler`，让他直接调用Bedrock实现代码评审。
 
+- **当前区域没有Bedrock Claude3模型怎么办？**
+
+	当前版本目前不支持跨区调用Claude3。
+
+	但是技术上是可以跨区调用Claude3的，您需要自行改写`{project_name}-task-executor`，将Bedrock调用过程改为跨区域调用方式。具体方法可参看《[How do I use a cross-account to invoke Amazon Bedrock in my account?](https://repost.aws/knowledge-center/bedrock-invoke-with-cross-account)》
+
 ## 8. 故障排除
 
 - **Missing Authentication Token**
@@ -214,3 +221,9 @@
 	- `{project_name}-request-handler`日志中是否存在类似于`Fail to process`或`skip the processing.`的日志，明确表示失败。
 	
 	- 等等。
+
+- **触发Bedrock失败怎么回事？**
+
+	检查当前区域是否具有Bedrock Claude3模型，例如：美东1（us-east-1）、美西2（us-west-2）、孟买（ap-south-1）、悉尼（ap-southeast-2）、巴黎（eu-west-3）、爱尔兰（eu-west-1）等区是具有Bedrock Claude3模型的，完整信息可参看《[按 AWS 地区划分的模型支持](https://docs.aws.amazon.com/zh_cn/bedrock/latest/userguide/models-regions.html)》
+
+	另外，检查是否开通了Bedrock Claude3模型。可在`Amazon Bedrock`服务左侧菜单`Model access`中查看和管理。
